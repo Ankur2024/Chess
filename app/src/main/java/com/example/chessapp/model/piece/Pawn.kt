@@ -1,9 +1,12 @@
 package com.example.chessapp.model.piece
 
-import android.graphics.drawable.Drawable
-import androidx.annotation.DrawableRes
 import androidx.compose.ui.unit.IntOffset
 import com.example.chessapp.R
+import com.example.chessapp.model.piece.dsl.DiagonalMovement
+import com.example.chessapp.model.piece.dsl.StraightMovement
+import com.example.chessapp.model.piece.dsl.buildPieceMovement
+import com.example.chessapp.model.piece.dsl.getDiagonalMoves
+import com.example.chessapp.model.piece.dsl.getStraightMoves
 
 class Pawn (
     override val color: Piece.Color,
@@ -16,19 +19,28 @@ class Pawn (
         R.drawable.pawn_dark
     }
     override fun getAvailableMoves(piece: List<Piece>): Set<IntOffset> {
-        val moves = mutableSetOf<IntOffset>()
-        val direction = if(color.isWhite) 1 else -1
-        val isFirstMove = (position.y == 2 && color.isWhite) ||
-                    (position.y == 7 && color.isBlack)
+        val isFirstMove =
+            position.y == 2 && color.isWhite ||
+                    position.y == 7 && color.isBlack
 
-        val nextPosition1 = IntOffset(
-            x = position.x,
-            y = position.y + direction
-        )
-        val nextPiece1 = piece.find { it.position == nextPosition1 }
-        if(moves.add(nextPosition1))
-        return moves
+        return buildPieceMovement(piece) {
+            straightMoves(
+                movement = if (color.isWhite) StraightMovement.Up else StraightMovement.Down,
+                maxMovements = if (isFirstMove) 2 else 1,
+                canCapture = false
+            )
+
+            diagonalMoves(
+                movement = if (color.isWhite) DiagonalMovement.UpLeft else DiagonalMovement.DownLeft,
+                maxMovements = 1,
+                canCapture = true
+            )
+
+            diagonalMoves(
+                movement = if (color.isWhite) DiagonalMovement.UpLeft else DiagonalMovement.DownLeft,
+                maxMovements = 1,
+                canCapture = true
+            )
+        }
     }
-
-
 }
